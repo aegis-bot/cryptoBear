@@ -1,6 +1,7 @@
 package com.trade.cryptoBear.service.impl;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import com.trade.cryptoBear.exception.InsufficientBalanceException;
 import com.trade.cryptoBear.exception.InsufficientQuantityException;
 import com.trade.cryptoBear.repository.OrderbookRepository;
 import com.trade.cryptoBear.repository.TraderAccountRepository;
+import com.trade.cryptoBear.service.AssetOwnershipService;
 import com.trade.cryptoBear.service.BuySellService;
 import com.trade.cryptoBear.service.OrderbookService;
 import com.trade.cryptoBear.service.TraderAccountService;
@@ -29,8 +31,8 @@ public class BuySellServiceImpl implements BuySellService {
     @Autowired
     TraderAccountService traderAccountService;
 //
-    //@Autowired
-    //AssetOwnershipService assetOwnershipService;
+    @Autowired
+    AssetOwnershipService assetOwnershipService;
 //
     @Autowired
     TradingHistoryService tradingHistoryService;
@@ -53,7 +55,7 @@ public class BuySellServiceImpl implements BuySellService {
         if(option.equalsIgnoreCase("BUY")) {
             return buy(tradeRequest);
         } else if (option.equalsIgnoreCase("SELL")) {
-            return TradeStatus.SUCCESS;
+            return sell(tradeRequest);
         } else {
             return TradeStatus.UNKNOWN_ERROR;
         }
@@ -76,41 +78,77 @@ public class BuySellServiceImpl implements BuySellService {
         boolean higherThanSell = pricePerQty.compareTo(orderPrice) >= 0;
         boolean sufficentOrderQty = qty.compareTo(orderQty) < 0;
     
-        
         if (enoughBalance && higherThanSell && sufficentOrderQty) {
             tradeRequest.setPricePerQty(orderPrice);
             BigDecimal toDeduct = tradeRequest.getPricePerQty().multiply(tradeRequest.getQty());
             traderAccountService.deductBalance(username, toDeduct);
-            // add AssetOwnership logic
-            TradingHistory record = new TradingHistory(tradeRequest);
-            record.setStatus(TradeStatus.SUCCESS);
-            tradingHistoryService.addToHistory(record);
-            return TradeStatus.SUCCESS;
+            assetOwnershipService.addAsset(tradeRequest);
+            return recordTradingHistory(tradeRequest, TradeStatus.SUCCESS);
 
         } else if (enoughBalance && !higherThanSell) {
-            TradingHistory record = new TradingHistory(tradeRequest);
-            record.setStatus(TradeStatus.PENDING);
-            tradingHistoryService.addToHistory(record);
-            return TradeStatus.PENDING;
-        } else if (enoughBalance && higherThanSell && !sufficentOrderQty) {
+            return recordTradingHistory(tradeRequest, TradeStatus.PENDING);
+        } else if (enoughBalance && !sufficentOrderQty) {
             tradeRequest.setPricePerQty(orderPrice);
             tradeRequest.setQty(orderQty);
             BigDecimal toDeduct = tradeRequest.getPricePerQty().multiply(tradeRequest.getQty());
             traderAccountService.deductBalance(username, toDeduct);
-            //add AssetOwnership logic 
-
-            TradingHistory record = new TradingHistory(tradeRequest);
-            record.setStatus(TradeStatus.PARTIALLY_FILLED);
-            tradingHistoryService.addToHistory(record);
-            return TradeStatus.PARTIALLY_FILLED;
-
+            tradeRequest.setPricePerQty(pricePerQty);
+            tradeRequest.setQty(qty);
+            assetOwnershipService.addAsset(tradeRequest);
+            return recordTradingHistory(tradeRequest, TradeStatus.PARTIALLY_FILLED);
         } else if (!enoughBalance) {
-            TradingHistory record = new TradingHistory(tradeRequest);
-            record.setStatus(TradeStatus.INSUFFICIENT_FUNDS);
-            return TradeStatus.INSUFFICIENT_FUNDS;
+            return recordTradingHistory(tradeRequest, TradeStatus.INSUFFICIENT_FUNDS);
         } else {
             return TradeStatus.UNKNOWN_ERROR;
         }
+    }
+
+    TradeStatus sell(TradeRequest tradeRequest) {
+        String username = tradeRequest.getUsername();
+        String symbol = tradeRequest.getSymbol();
+        BigDecimal pricePerQty = tradeRequest.getPricePerQty();
+        BigDecimal qtyToSell = tradeRequest.getQty();
+        if(Optional.ofNullable(assetOwnershipService.getTraderAssetsForSymbol(username, symbol)).isEmpty()) {
+            return recordTradingHistory(tradeRequest, TradeStatus.INSUFFICIENT_ASSETS);
+        }
+        BigDecimal qtyAvailable = assetOwnershipService.getTraderAssetsForSymbol(username, symbol).getQty();
+        
+        Orderbook orderbook = orderbookRepository.searchLatestOrderOfSymbol(symbol);
+        BigDecimal orderPrice = orderbook.getBidPrice();
+        BigDecimal orderQty = orderbook.getBidQty();
+
+        boolean enoughAssets = qtyAvailable.compareTo(qtyToSell) >= 0;
+        boolean lowerThanBuyPrice = pricePerQty.compareTo(orderPrice) <= 0;
+        boolean sufficentOrderQty = qtyToSell.compareTo(orderQty) < 0;
+
+        if (enoughAssets && lowerThanBuyPrice && sufficentOrderQty) {
+            BigDecimal moneyToEarn = qtyToSell.multiply(pricePerQty);
+            traderAccountService.addBalance(username, moneyToEarn);
+            assetOwnershipService.removeAsset(tradeRequest);
+            return recordTradingHistory(tradeRequest, TradeStatus.SUCCESS);
+        } else if (enoughAssets && !lowerThanBuyPrice) {
+            return recordTradingHistory(tradeRequest, TradeStatus.PENDING);
+        } else if (enoughAssets && !sufficentOrderQty) {
+            BigDecimal moneyToEarn = orderQty.multiply(pricePerQty);
+            traderAccountService.addBalance(username, moneyToEarn);
+            tradeRequest.setQty(orderQty);
+            assetOwnershipService.removeAsset(tradeRequest);
+            tradeRequest.setQty(qtyToSell);
+            return recordTradingHistory(tradeRequest, TradeStatus.PARTIALLY_FILLED);
+        } else if (!enoughAssets) {
+            return recordTradingHistory(tradeRequest, TradeStatus.INSUFFICIENT_ASSETS);
+        } else {
+            return TradeStatus.UNKNOWN_ERROR;
+        }
+
+
+    }
+
+    TradeStatus recordTradingHistory(TradeRequest tradeRequest, TradeStatus tradeStatus) {
+        TradingHistory record = new TradingHistory(tradeRequest);
+        record.setStatus(tradeStatus);
+        tradingHistoryService.addToHistory(record);
+        return tradeStatus;
     }
     
 }

@@ -15,7 +15,7 @@ import lombok.Setter;
 public class AssetOwnership {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private String assetId;
+    private Long assetId;
     private String userid;
     private String symbol;
     private BigDecimal qty;

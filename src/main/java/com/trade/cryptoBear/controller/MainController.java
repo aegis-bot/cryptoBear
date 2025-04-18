@@ -13,19 +13,19 @@ import org.springframework.web.bind.annotation.*;
 
 import com.trade.cryptoBear.RequestObject.TradeRequest;
 import com.trade.cryptoBear.ResponseObject.AggregatedPriceResponse;
-import com.trade.cryptoBear.entity.Department;
 import com.trade.cryptoBear.entity.Orderbook;
-import com.trade.cryptoBear.service.DepartmentService;
 import com.trade.cryptoBear.service.OrderbookService;
-import com.trade.cryptoBear.ResponseObject.TradeResponse;
-import com.trade.cryptoBear.entity.AssetOwnership;
-import com.trade.cryptoBear.exception.InsufficientBalanceException;
-import com.trade.cryptoBear.exception.InsufficientQuantityException;
-import com.trade.cryptoBear.service.AssetOwnershipService;
 import com.trade.cryptoBear.service.BuySellService;
 import com.trade.cryptoBear.service.TraderAccountService;
-import com.trade.cryptoBear.service.impl.TradingHistoryService;
+import com.trade.cryptoBear.service.TradingHistoryService;
 import com.trade.cryptoBear.variables.TradeStatus;
+
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
+import com.trade.cryptoBear.RequestObject.IdentityRequest;
+import com.trade.cryptoBear.entity.TradingHistory;
+
 
 
 // Annotation
@@ -43,8 +43,8 @@ public class MainController {
     @Autowired
     private BuySellService buySellService;
 
-    //@Autowired
-    //private TradingHistoryService tradingHistoryService;
+    @Autowired
+    private TradingHistoryService tradingHistoryService;
 //
     //@Autowired
     //private AssetOwnershipService assetOwnershipService;
@@ -64,11 +64,23 @@ public class MainController {
             return new ResponseEntity<>(status.toString(), HttpStatus.OK);
         } else {
             return new ResponseEntity<>("Forbidden", HttpStatus.FORBIDDEN);
-        }
-
-
-        
+        } 
     }
+
+    @PostMapping("/checkBalanceAndAssets")
+    public String checkBalance(@Valid @RequestBody IdentityRequest requestBody) {
+        //TODO: process POST request
+        
+        return entity;
+    }
+    
+
+    @PostMapping("/seeTradingHistory")
+    public List<TradingHistory> fetchTradingHistory(@Valid @RequestBody IdentityRequest requestBody) {
+        List<TradingHistory> allRecords = tradingHistoryService.getAllHistory(requestBody.getUsername());
+        return allRecords;
+    }
+    
     
 
 }

@@ -13,7 +13,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class TradeRequest {
+public class TradeRequest extends IdentityRequest {
     @NotBlank
     private String option;
     @NotBlank
@@ -22,8 +22,6 @@ public class TradeRequest {
     private BigDecimal pricePerQty;
     @NotBlank
     private BigDecimal qty;
-    @NotBlank
-    private String username;  // obviously security flaw, use this in place of cookies
 }
 
 

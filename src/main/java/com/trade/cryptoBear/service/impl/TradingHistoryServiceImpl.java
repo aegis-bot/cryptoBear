@@ -13,17 +13,16 @@ import com.trade.cryptoBear.service.TradingHistoryService;
 public class TradingHistoryServiceImpl implements  TradingHistoryService {
 
     @Autowired
-    TradingHistoryRepository tradingHistoryRepository;
+    TradingHistoryRepository historyRepo;
 
     @Override
     public TradingHistory addToHistory(TradingHistory history) {
-        return tradingHistoryRepository.save(history);
+        return historyRepo.save(history);
     }
 
     @Override
     public List<TradingHistory> getAllHistory(String username) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getAllHistory'");
+        return historyRepo.getTradingHistory(username);
     }
 
 }
