@@ -1,5 +1,5 @@
 package com.trade.cryptoBear.variables;
 
 public enum TradeStatus {
-    SUCCESS, PENDING, FAILURE
+    SUCCESS, PENDING, PARTIALLY_FILLED, INSUFFICIENT_FUNDS, INSUFFICIENT_ASSETS, UNKNOWN_ERROR
 }

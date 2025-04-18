@@ -6,6 +6,9 @@ import java.util.List;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.trade.cryptoBear.RequestObject.TradeRequest;
@@ -21,7 +24,8 @@ import com.trade.cryptoBear.exception.InsufficientQuantityException;
 import com.trade.cryptoBear.service.AssetOwnershipService;
 import com.trade.cryptoBear.service.BuySellService;
 import com.trade.cryptoBear.service.TraderAccountService;
-import com.trade.cryptoBear.service.TradingHistoryService;
+import com.trade.cryptoBear.service.impl.TradingHistoryService;
+import com.trade.cryptoBear.variables.TradeStatus;
 
 
 // Annotation
@@ -54,20 +58,16 @@ public class MainController {
     }
 
     @PostMapping("/trade")
-    public TradeResponse getMethodName(@Valid @RequestBody TradeRequest requestBody) {
-        System.out.println();
+    public ResponseEntity<String> getMethodName(@Valid @RequestBody TradeRequest requestBody) {
         if (traderAccountService.verifyUser(requestBody.getUsername())) {
-            try {
-                buySellService.performTrade(requestBody);
-            } catch (InsufficientBalanceException | InsufficientQuantityException ex) {
-
-            }
+            TradeStatus status =  buySellService.performTrade(requestBody);
+            return new ResponseEntity<>(status.toString(), HttpStatus.OK);
         } else {
-
+            return new ResponseEntity<>("Forbidden", HttpStatus.FORBIDDEN);
         }
 
 
-        return new TradeResponse();
+        
     }
     
 

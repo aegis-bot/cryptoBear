@@ -1,4 +1,4 @@
-package com.trade.cryptoBear.service;
+package com.trade.cryptoBear.service.impl;
 
 
 import java.time.LocalDateTime;
@@ -18,13 +18,13 @@ import com.trade.cryptoBear.ResponseObject.HuobiResponse;
 import com.trade.cryptoBear.entity.Orderbook;
 import com.trade.cryptoBear.mapper.MapperToOrderbook;
 import com.trade.cryptoBear.repository.TraderAccountRepository;
-import com.trade.cryptoBear.repository.UserRepository;
+import com.trade.cryptoBear.service.OrderbookService;
 import com.trade.cryptoBear.upstreamObjects.BinanceObject;
 import com.trade.cryptoBear.upstreamObjects.HuobiObject;
 
 
 @Service
-public class PriceAggregationService {
+public class PriceAggregationServiceImpl {
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private static final List<String> currenciesAvailable = List.of("ETHUSDT", "BTCUSDT");
     RestClient defaultClient = RestClient.create();
@@ -32,15 +32,12 @@ public class PriceAggregationService {
 
     @Autowired
     private OrderbookService orderbookService;
-    
-    @Autowired
-    TraderAccountRepository traderRepository;
 
     private String binance = "https://api.binance.com/api/v3/ticker/bookTicker";
     private String huobi = "https://api.huobi.pro/market/tickers";
 
 	@Scheduled(fixedRate = 10000)
-	public void retrieveBestPrice() {
+	private void retrieveBestPrice() {
         LocalDateTime currentTime = getCurrentTime();
         
         BinanceObject[] response1 = defaultClient.get().uri(binance).retrieve().toEntity(BinanceObject[].class).getBody();

@@ -11,5 +11,5 @@ public interface TraderAccountService {
 
     //return final balance
     BigDecimal addBalance(String username, BigDecimal amount);
-    BigDecimal deductBalance(String username, BigDecimal amount) throws InsufficientBalanceException;
+    BigDecimal deductBalance(String username, BigDecimal amount);
 }

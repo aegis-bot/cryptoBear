@@ -16,7 +16,8 @@ import lombok.Setter;
 public class TradeRequest {
     @NotBlank
     private String option;
-    
+    @NotBlank
+    private String symbol;
     @NotBlank
     private BigDecimal pricePerQty;
     @NotBlank

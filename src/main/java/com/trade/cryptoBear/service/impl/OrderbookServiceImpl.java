@@ -25,6 +25,6 @@ public class OrderbookServiceImpl implements OrderbookService {
     
     @Override
     public List<Orderbook> retrieveLatestOrderbook(){
-        return (List<Orderbook>)orderbookRepo.searchLatestTransactions();
+        return (List<Orderbook>)orderbookRepo.searchLatestOrders();
     }
 }

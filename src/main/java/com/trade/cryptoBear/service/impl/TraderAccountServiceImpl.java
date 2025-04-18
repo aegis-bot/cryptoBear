@@ -26,17 +26,21 @@ public class TraderAccountServiceImpl implements TraderAccountService {
 
     @Override
     public BigDecimal getBalance(String username) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return traderRepository.getBalance(username);
     }
 
     @Override
     public BigDecimal addBalance(String username, BigDecimal amount) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        BigDecimal sum = getBalance(username).add(amount);
+        traderRepository.updateBalance(username, sum);
+        return sum;
     }
 
     @Override
-    public BigDecimal deductBalance(String username, BigDecimal amount) throws InsufficientBalanceException {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public BigDecimal deductBalance(String username, BigDecimal amount) {
+        BigDecimal difference = getBalance(username).subtract(amount);
+        traderRepository.updateBalance(username, difference);
+        return difference;
     }
 
     

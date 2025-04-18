@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.trade.cryptoBear.entity.TraderAccount;
 import com.trade.cryptoBear.repository.TraderAccountRepository;
-import com.trade.cryptoBear.repository.UserRepository;
 
 @SpringBootApplication
 @RestController
