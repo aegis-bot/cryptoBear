@@ -18,6 +18,7 @@ public class OrderbookServiceImpl implements OrderbookService {
     
     @Override
     public Orderbook add(Orderbook orderbook) {
+        orderbookRepo.deleteAll();
         return orderbookRepo.save(orderbook);
     }
 

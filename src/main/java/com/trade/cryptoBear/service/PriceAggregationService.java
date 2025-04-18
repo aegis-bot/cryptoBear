@@ -8,23 +8,20 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.w3c.dom.NameList;
-import org.springframework.http.ResponseEntity;
+
 
 import com.trade.cryptoBear.ResponseObject.HuobiResponse;
 import com.trade.cryptoBear.entity.Orderbook;
 import com.trade.cryptoBear.mapper.MapperToOrderbook;
-import com.trade.cryptoBear.repository.OrderbookRepository;
+import com.trade.cryptoBear.repository.TraderAccountRepository;
+import com.trade.cryptoBear.repository.UserRepository;
 import com.trade.cryptoBear.upstreamObjects.BinanceObject;
 import com.trade.cryptoBear.upstreamObjects.HuobiObject;
 
-import reactor.core.publisher.Mono;
 
 @Service
 public class PriceAggregationService {
@@ -36,6 +33,9 @@ public class PriceAggregationService {
     @Autowired
     private OrderbookService orderbookService;
     
+    @Autowired
+    TraderAccountRepository traderRepository;
+
     private String binance = "https://api.binance.com/api/v3/ticker/bookTicker";
     private String huobi = "https://api.huobi.pro/market/tickers";
 
@@ -74,6 +74,7 @@ public class PriceAggregationService {
                 bestOrderbook.setAsk(orderbook2);
             }
             orderbookService.add(bestOrderbook);
+
         }
 	}
 
