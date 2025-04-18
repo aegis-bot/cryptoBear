@@ -1,5 +1,6 @@
 package com.trade.cryptoBear.controller;
 
+import java.math.BigDecimal;
 import java.util.List;
 // Importing required classes
 
@@ -15,6 +16,7 @@ import com.trade.cryptoBear.RequestObject.TradeRequest;
 import com.trade.cryptoBear.ResponseObject.AggregatedPriceResponse;
 import com.trade.cryptoBear.entity.Orderbook;
 import com.trade.cryptoBear.service.OrderbookService;
+import com.trade.cryptoBear.service.AssetOwnershipService;
 import com.trade.cryptoBear.service.BuySellService;
 import com.trade.cryptoBear.service.TraderAccountService;
 import com.trade.cryptoBear.service.TradingHistoryService;
@@ -24,6 +26,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.trade.cryptoBear.RequestObject.IdentityRequest;
+import com.trade.cryptoBear.ResponseObject.AllAssetResponse;
+import com.trade.cryptoBear.entity.AssetOwnership;
 import com.trade.cryptoBear.entity.TradingHistory;
 
 
@@ -46,8 +50,8 @@ public class MainController {
     @Autowired
     private TradingHistoryService tradingHistoryService;
 //
-    //@Autowired
-    //private AssetOwnershipService assetOwnershipService;
+    @Autowired
+    private AssetOwnershipService assetOwnershipService;
 
     // Read operation
     @GetMapping("/seeLatestPrice")
@@ -67,11 +71,13 @@ public class MainController {
         } 
     }
 
-    @PostMapping("/checkBalanceAndAssets")
-    public String checkBalance(@Valid @RequestBody IdentityRequest requestBody) {
-        //TODO: process POST request
-        
-        return entity;
+    @PostMapping("/checkAllAssets")
+    public AllAssetResponse checkBalance(@Valid @RequestBody IdentityRequest requestBody) {
+        String username = requestBody.getUsername();
+        BigDecimal balance = traderAccountService.getBalance(username);
+        List<AssetOwnership> assetOwnerships = assetOwnershipService.getTraderAssets(username);
+
+        return new AllAssetResponse(balance, assetOwnerships);
     }
     
 
