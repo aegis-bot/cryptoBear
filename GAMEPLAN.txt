@@ -1,3 +1,4 @@
 HOW TO USE:
+
 1) run the package cryptoBear-0.0.1-SNAPSHOT.jar
 2) Play with the postman provided: CryptoBearAPISamples.postman_collection.json
