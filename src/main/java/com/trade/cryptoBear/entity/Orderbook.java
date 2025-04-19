@@ -22,7 +22,6 @@ import lombok.Setter;
 @Entity
 @Data
 @NoArgsConstructor
-@Builder
 @Getter
 @Setter
 // Class
