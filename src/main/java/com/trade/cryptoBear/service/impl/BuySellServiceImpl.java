@@ -57,7 +57,7 @@ public class BuySellServiceImpl implements BuySellService {
         } else if (option.equalsIgnoreCase("SELL")) {
             return sell(tradeRequest);
         } else {
-            return TradeStatus.UNKNOWN_ERROR;
+            return TradeStatus.FAILED_UNKNOWN_ERROR;
         }
     }
 
@@ -97,9 +97,9 @@ public class BuySellServiceImpl implements BuySellService {
             assetOwnershipService.addAsset(tradeRequest);
             return recordTradingHistory(tradeRequest, TradeStatus.PARTIALLY_FILLED);
         } else if (!enoughBalance) {
-            return recordTradingHistory(tradeRequest, TradeStatus.INSUFFICIENT_FUNDS);
+            return recordTradingHistory(tradeRequest, TradeStatus.FAILED_INSUFFICIENT_FUNDS);
         } else {
-            return TradeStatus.UNKNOWN_ERROR;
+            return TradeStatus.FAILED_UNKNOWN_ERROR;
         }
     }
 
@@ -109,7 +109,7 @@ public class BuySellServiceImpl implements BuySellService {
         BigDecimal pricePerQty = tradeRequest.getPricePerQty();
         BigDecimal qtyToSell = tradeRequest.getQty();
         if(Optional.ofNullable(assetOwnershipService.getTraderAssetsForSymbol(username, symbol)).isEmpty()) {
-            return recordTradingHistory(tradeRequest, TradeStatus.INSUFFICIENT_ASSETS);
+            return recordTradingHistory(tradeRequest, TradeStatus.FAILED_INSUFFICIENT_ASSETS);
         }
         BigDecimal qtyAvailable = assetOwnershipService.getTraderAssetsForSymbol(username, symbol).getQty();
         
@@ -136,9 +136,9 @@ public class BuySellServiceImpl implements BuySellService {
             tradeRequest.setQty(qtyToSell);
             return recordTradingHistory(tradeRequest, TradeStatus.PARTIALLY_FILLED);
         } else if (!enoughAssets) {
-            return recordTradingHistory(tradeRequest, TradeStatus.INSUFFICIENT_ASSETS);
+            return recordTradingHistory(tradeRequest, TradeStatus.FAILED_INSUFFICIENT_ASSETS);
         } else {
-            return TradeStatus.UNKNOWN_ERROR;
+            return TradeStatus.FAILED_UNKNOWN_ERROR;
         }
 
 

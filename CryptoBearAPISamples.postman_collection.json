@@ -1,0 +1,143 @@
+{
+	"info": {
+		"_postman_id": "c12b425f-2df2-4013-adca-c8e71d12b084",
+		"name": "CryptoBearAPISamples",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "23139126"
+	},
+	"item": [
+		{
+			"name": "binance",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://api.binance.com/api/v3/ticker/bookTicker",
+					"protocol": "https",
+					"host": [
+						"api",
+						"binance",
+						"com"
+					],
+					"path": [
+						"api",
+						"v3",
+						"ticker",
+						"bookTicker"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "huobi",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://api.huobi.pro/market/tickers",
+					"protocol": "https",
+					"host": [
+						"api",
+						"huobi",
+						"pro"
+					],
+					"path": [
+						"market",
+						"tickers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "seeLatestPrice",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "trade",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"option\": \"BUY\",\n    \"symbol\": \"BTCUSDT\",\n    \"pricePerQty\": 10000,\n    \"qty\": 0.01,\n    \"username\": \"warren buffet\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/trade",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"trade"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "seeTradingHistory",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"warren buffet\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/seeTradingHistory",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"seeTradingHistory"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "checkAllAssets",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"warren buffet\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/seeTradingHistory",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"seeTradingHistory"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

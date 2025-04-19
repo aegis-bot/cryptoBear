@@ -1,11 +1,16 @@
 package com.trade.cryptoBear.service.impl;
 
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.PriorityQueue;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -40,11 +45,8 @@ public class PriceAggregationServiceImpl {
 	private void retrieveBestPrice() {
         LocalDateTime currentTime = getCurrentTime();
         
-        BinanceObject[] response1 = defaultClient.get().uri(binance).retrieve().toEntity(BinanceObject[].class).getBody();
-
-        HuobiResponse huobiResp = defaultClient.get().uri(huobi).retrieve().toEntity(HuobiResponse.class).getBody();
-        List<HuobiObject> listOfHuobiObjects = huobiResp.getData();
-        HuobiObject[] response2 = listOfHuobiObjects.toArray(new HuobiObject[listOfHuobiObjects.size()]);
+        BinanceObject[] response1 = getBinanceObjects();
+        HuobiObject[] response2 = getHuobiObjects();
 
         allOrderbooks.clear();
         for(String currency: currenciesAvailable) {
@@ -52,26 +54,20 @@ public class PriceAggregationServiceImpl {
             Orderbook orderbook1 = findCurrencyFromList(response1, currency, currentTime);
             Orderbook orderbook2 = findCurrencyFromList(response2, currency, currentTime);
             //bid(sell) highest, ask(buy) lowest
-            if(orderbook1.getBidPrice().compareTo(orderbook2.getBidPrice()) > 0) {
-                bestOrderbook.setBid(orderbook1);
-            } else if (orderbook1.getBidPrice().compareTo(orderbook2.getBidPrice()) < 0) {
-                bestOrderbook.setBid(orderbook2);
-            } else if (orderbook1.getBidQty().compareTo(orderbook2.getBidQty()) > 0) {
-                bestOrderbook.setBid(orderbook1);
-            } else {
-                bestOrderbook.setBid(orderbook2);
-            }
-            if(orderbook1.getAskPrice().compareTo(orderbook2.getAskPrice()) < 0) {
-                bestOrderbook.setAsk(orderbook1);
-            } else if (orderbook1.getAskPrice().compareTo(orderbook2.getAskPrice()) > 0) {
-                bestOrderbook.setAsk(orderbook2);
-            } else if (orderbook1.getAskPrice().compareTo(orderbook2.getAskPrice()) > 0) {
-                bestOrderbook.setAsk(orderbook1);
-            } else {
-                bestOrderbook.setAsk(orderbook2);
-            }
-            orderbookService.add(bestOrderbook);
 
+            PriorityQueue<Orderbook> askQueue = new PriorityQueue<>(
+                Comparator.comparing(Orderbook::getAskPrice)
+            );
+            PriorityQueue<Orderbook> bidQueue = new PriorityQueue<>(
+                Comparator.comparing(Orderbook::getBidPrice).reversed()
+            );
+            
+            askQueue.addAll(Arrays.asList(orderbook1, orderbook2));
+            bidQueue.addAll(Arrays.asList(orderbook1, orderbook2));
+
+            bestOrderbook.setAsk(askQueue.poll());
+            bestOrderbook.setBid(bidQueue.poll());
+            orderbookService.add(bestOrderbook);
         }
 	}
 
@@ -88,4 +84,14 @@ public class PriceAggregationServiceImpl {
         LocalDateTime currentDateTime = LocalDateTime.now();
 		return currentDateTime;
 	}
+
+    private BinanceObject[] getBinanceObjects() {
+        return defaultClient.get().uri(binance).retrieve().toEntity(BinanceObject[].class).getBody();
+    }
+
+    private HuobiObject[] getHuobiObjects() {
+        HuobiResponse huobiResp = defaultClient.get().uri(huobi).retrieve().toEntity(HuobiResponse.class).getBody();
+        List<HuobiObject> listOfHuobiObjects = huobiResp.getData();
+        return listOfHuobiObjects.toArray(new HuobiObject[listOfHuobiObjects.size()]);
+    }
 }

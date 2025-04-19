@@ -1,10 +1,3 @@
-1. PriceAggregation into db (done)
-2. create /getLatestPrices (done)
-3. create sell/trading function based on latest getLatestPrices
-4. check balance
-5. retreive trading history
-
-Backlog
-- optimise /seeLatestPrice query
-- cleanup PriceAggregation Service code
-- utilised enum
+HOW TO USE:
+1) go to terminal, run ./mvnw spring-boot:run
+2) Play with the postman provided: CryptoBearAPISamples.postman_collection.json
